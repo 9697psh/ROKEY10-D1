@@ -1,0 +1,2 @@
+docked_before,dock_s,undock_s,docked_after,localize_s,amcl_x,amcl_y,init_err_m
+False,20.47,6.67,False,0.1,0.0,0.0,0.0

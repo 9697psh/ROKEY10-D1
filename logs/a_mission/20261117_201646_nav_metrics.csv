@@ -1,0 +1,2 @@
+goal,attempt,result,elapsed_s,goal_x,goal_y,goal_yaw_deg,actual_x,actual_y,actual_yaw_deg,pos_err_m,yaw_err_deg,start,localize_s
+sector_1,1,SUCCEEDED,1.92,-0.6,0.01,180.0,-0.258,0.043,-177.5,0.344,2.5,undocked,0.0

@@ -1,0 +1,2 @@
+docked_before,dock_s,undock_s,docked_after,localize_s,amcl_x,amcl_y,init_err_m,mission_id,cmd_wait_s
+True,0.0,6.69,False,0.1,0.0,0.0,0.0,M_TEST_001,12.62

@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""Survey Mission Manager (로봇 A 작업 관리, a_mission.py) - 섹터 좌표 Nav2 이동.
+
+설계도: PC1 Survey Mission Manager → /robot_a/navigate_to_pose → Robot A Navigation
+참고: day3/3_1_a·3_1_c (Nav2 실행 순서·순회·dock), 3_1_e (좌표 목록), 3_1_d (좌표 없으면 종료),
+      day2/2_4_e (CSV 저장), nav2_simple_commander BasicNavigator (initial_pose_received)
+
+실행: localization → nav2 → (undock 상태면 RViz 2D Pose Estimate) →
+    ros2 run robot_a_navigation a_mission --ros-args -r __ns:=/robot5
+결과: ~/farmmate_ws/logs/a_mission/<시각>_nav_metrics.csv (지점·시도별 시간, 위치/방향 오차)
+      시도마다 한 줄씩 바로 저장 (Ctrl+C 로 끊겨도 남음). 실제 위치는 TF map→base_link (pose_src 열)
+"""
+
+import csv
+import math
+import os
+import sys
+import time
+
+import rclpy
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from nav2_simple_commander.robot_navigator import TaskResult
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+from rclpy.time import Time
+from tf2_ros import Buffer, TransformException, TransformListener
+from turtlebot4_navigation.turtlebot4_navigator import TurtleBot4Directions, TurtleBot4Navigator
+
+# ===== 좌표 (지도 좌표 [x, y], 방향은 도 단위 숫자 또는 TurtleBot4Directions) =====
+GOALS = [{'name': 'A_1', 'position': [-0.55, 0.1], 'yaw_deg' : TurtleBot4Directions.SOUTH},
+         {'name': 'A_2', 'position': [-1.93, 0.3], 'yaw_deg' : TurtleBot4Directions.NORTH},
+         {'name': 'B_1', 'position': [-0.46, 3.33], 'yaw_deg' : TurtleBot4Directions.WEST},
+         {'name': 'B_2', 'position': [-1.13, 3.41], 'yaw_deg' : TurtleBot4Directions.WEST},
+         {'name': 'B_3', 'position': [-0.95, 4.81], 'yaw_deg' : TurtleBot4Directions.EAST},
+         {'name': 'B_4', 'position': [-0.24, 4.72], 'yaw_deg' : TurtleBot4Directions.EAST},
+         {'name': 'C_1', 'position': [-0.24, 4.72], 'yaw_deg' : TurtleBot4Directions.WEST},
+         {'name': 'C_2', 'position': [-0.95, 4.81], 'yaw_deg' : TurtleBot4Directions.WEST},
+         {'name': 'C_3', 'position': [-0.87, 6.07], 'yaw_deg' : TurtleBot4Directions.EAST},
+         {'name': 'C_4', 'position': [-0.05, 6.0], 'yaw_deg' : TurtleBot4Directions.EAST},
+         {'name': 'A_1', 'position': [-0.55, 0.1], 'yaw_deg' : TurtleBot4Directions.SOUTH}         
+]
+
+INITIAL_POSITION = [0.0, 0.0]                  # 도킹 상태로 시작할 때 undock 직후 위치
+INITIAL_DIRECTION = TurtleBot4Directions.SOUTH
+MAX_TRIES = 3            # 지점마다 최대 시도 (흐름도 ①: 3회 실패 시 건너뜀)
+LOCALIZE_TIMEOUT = 30.0  # amcl 위치를 기다리는 최대 시간(초)
+DOCK_AT_END = True       # 끝나면 도킹
+LOG_DIR = os.path.expanduser('~/farmmate_ws/logs/a_mission')
+
+latest_pose = {}  # 마지막 amcl_pose: x, y, yaw(도)
+
+
+def quat_to_yaw_deg(q):
+    return math.degrees(math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z)))
+
+
+def amcl_callback(msg):
+    p, q = msg.pose.pose.position, msg.pose.pose.orientation
+    latest_pose.update(x=p.x, y=p.y, yaw=quat_to_yaw_deg(q))
+
+
+def get_pose(tf_buffer):
+    """실제 위치: TF map→base_link. amcl_pose 는 0.20 m 움직여야 갱신돼서 정지 위치와 다를 수 있음.
+    TF 를 못 읽으면 마지막 amcl_pose 사용. 반환: (pose dict, 'tf' | 'amcl' | None)"""
+    try:
+        t = tf_buffer.lookup_transform('map', 'base_link', Time())
+        tr = t.transform.translation
+        return {'x': tr.x, 'y': tr.y, 'yaw': quat_to_yaw_deg(t.transform.rotation)}, 'tf'
+    except TransformException:
+        return (dict(latest_pose), 'amcl') if latest_pose else ({}, None)
+
+
+def spin_for(navigator, sec):
+    """sec 초 동안 콜백 처리 (amcl_pose 갱신용)."""
+    t0 = time.time()
+    while time.time() - t0 < sec:
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+
+
+CSV_FIELDS = ['goal', 'attempt', 'result', 'elapsed_s', 'goal_x', 'goal_y', 'goal_yaw_deg',
+              'actual_x', 'actual_y', 'actual_yaw_deg', 'pos_err_m', 'yaw_err_deg', 'pose_src',
+              'start', 'localize_s']
+
+
+def make_row(goal, attempt, result, elapsed, start, localize_s, actual, pose_src):
+    gx, gy = goal['position']
+    gyaw = float(goal['yaw_deg'])
+    row = {'goal': goal['name'], 'attempt': attempt, 'result': getattr(result, 'name', str(result)),
+           'elapsed_s': round(elapsed, 2), 'goal_x': gx, 'goal_y': gy, 'goal_yaw_deg': gyaw,
+           'actual_x': None, 'actual_y': None, 'actual_yaw_deg': None, 'pos_err_m': None, 'yaw_err_deg': None,
+           'pose_src': pose_src, 'start': start, 'localize_s': round(localize_s, 1)}
+    if actual:
+        ax, ay, ayaw = actual['x'], actual['y'], actual['yaw']
+        row.update(actual_x=round(ax, 3), actual_y=round(ay, 3), actual_yaw_deg=round(ayaw, 1),
+                   pos_err_m=round(math.hypot(ax - gx, ay - gy), 3),
+                   yaw_err_deg=round((ayaw - gyaw + 180) % 360 - 180, 1))
+    return row
+
+
+def main():
+    # TB4 TF 는 /robot5/tf 로 나옴 → tf 리스너가 네임스페이스 tf 를 받도록 리매핑 (실행 명령은 그대로)
+    rclpy.init(args=sys.argv + ['--ros-args', '-r', '/tf:=tf', '-r', '/tf_static:=tf_static'])
+    navigator = TurtleBot4Navigator()
+    tf_buffer = Buffer()
+    TransformListener(tf_buffer, navigator)  # navigator 를 spin 할 때 TF 수신
+
+    # 좌표가 없으면 로봇을 움직이지 않고 종료 (3_1_d_create_path.py)
+    if len(GOALS) == 0:
+        navigator.error('No poses were given, exiting.')
+        rclpy.shutdown()
+        return
+
+    qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+    navigator.create_subscription(PoseWithCovarianceStamped, 'amcl_pose', amcl_callback, qos)
+
+    # 1. 시작 상태: 도킹이면 undock 후 초기 위치, undock 이면 RViz 2D Pose Estimate 위치 사용
+    docked = navigator.getDockedStatus()
+    initial_pose = navigator.getPoseStamped(INITIAL_POSITION, INITIAL_DIRECTION)
+    if docked:
+        navigator.info('도킹 상태에서 시작 → undock 후 초기 위치 설정')
+        navigator.undock()
+        navigator.setInitialPose(initial_pose)
+    else:
+        navigator.info('undock 상태에서 시작 → RViz 2D Pose Estimate 위치 사용 (안 찍었으면 지금 찍어 주세요)')
+
+    # 2. amcl 위치 대기 (BasicNavigator 가 amcl_pose 를 받으면 initial_pose_received = True)
+    t0, last_send = time.time(), time.time()
+    while not (navigator.initial_pose_received and latest_pose) and time.time() - t0 < LOCALIZE_TIMEOUT:
+        rclpy.spin_once(navigator, timeout_sec=0.5)
+        if docked and time.time() - last_send > 5.0:  # 응답이 없으면 5초마다 다시 보냄
+            navigator.setInitialPose(initial_pose)
+            last_send = time.time()
+    localize_s = time.time() - t0
+    if not navigator.initial_pose_received:
+        navigator.error(f'{LOCALIZE_TIMEOUT:.0f}초 안에 amcl 위치를 받지 못함. localization · /scan 확인 후 다시 실행')
+        rclpy.shutdown()
+        return
+    navigator.info(f'위치 확인 ({localize_s:.1f}초): {latest_pose}')
+
+    # 3. Nav2 대기 (초기 위치는 위에서 확인했으므로 라이브러리의 초기 위치 반복은 건너뜀)
+    navigator.info('Nav2 활성화 대기 중... (Nav2 터미널에 Managed nodes are active 가 나올 때까지)')
+    navigator.waitUntilNav2Active()
+
+    # 4. 지점마다 이동 (3_1_c 순회, 지점마다 startToPose, 최대 MAX_TRIES 번)
+    start = 'docked' if docked else 'undocked'
+    rows, t_run = [], time.time()
+
+    # 검증 수치 CSV: 시작할 때 만들고 시도마다 한 줄씩 바로 저장 (2_4_e 의 csv 저장 방식)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    csv_path = os.path.join(LOG_DIR, time.strftime('%Y%m%d_%H%M%S') + '_nav_metrics.csv')
+    csv_file = open(csv_path, 'w', newline='')
+    writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELDS)
+    writer.writeheader()
+    csv_file.flush()
+    navigator.info(f'기록 파일: {csv_path}')
+
+    for goal in GOALS:
+        pose = navigator.getPoseStamped(goal['position'], goal['yaw_deg'])
+        for attempt in range(1, MAX_TRIES + 1):
+            navigator.info(f"{goal['name']} 이동 시작 ({attempt}/{MAX_TRIES})")
+            t0 = time.time()
+            navigator.startToPose(pose)
+            result = navigator.getResult()
+            elapsed = time.time() - t0
+            spin_for(navigator, 1.0)  # 정지 후 TF · amcl_pose 갱신 대기
+            actual, pose_src = get_pose(tf_buffer)
+            row = make_row(goal, attempt, result, elapsed, start, localize_s, actual, pose_src)
+            rows.append(row)
+            writer.writerow(row)
+            csv_file.flush()
+            navigator.info(f"  {row['result']} · {row['elapsed_s']}초 · 위치 오차 {row['pos_err_m']} m · "
+                           f"방향 오차 {row['yaw_err_deg']}도 ({pose_src})")
+            if result == TaskResult.SUCCEEDED:
+                break
+            navigator.clearAllCostmaps()
+
+    # 5. 요약 (CSV 는 위에서 시도마다 저장 완료)
+    csv_file.close()
+    arrived = [r for r in rows if r['result'] == 'SUCCEEDED']
+    errs = [r['pos_err_m'] for r in arrived if r['pos_err_m'] is not None]
+    navigator.info(f"===== 결과: 도착 {len(arrived)}/{len(GOALS)} · 총 {time.time() - t_run:.1f}초 · "
+                   f"평균 위치 오차 {round(sum(errs) / len(errs), 3) if errs else None} m =====")
+    navigator.info(f'저장: {csv_path}')
+
+    # 6. 끝나면 도킹 (3_1_c_follow_waypoints.py)
+    if DOCK_AT_END:
+        navigator.dock()
+
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,11 @@
+goal,attempt,result,elapsed_s,goal_x,goal_y,goal_yaw_deg,actual_x,actual_y,actual_yaw_deg,pos_err_m,yaw_err_deg,pose_src,start,localize_s,capture_s,image_file,published
+A_1,1,SUCCEEDED,3.15,-0.55,0.0,180.0,-0.422,0.012,-178.3,0.129,1.7,tf,docked,0.1,3.01,,False
+A_2,1,SUCCEEDED,22.91,-1.93,0.0,0.0,-1.85,0.076,-2.5,0.11,-2.5,tf,docked,0.1,3.01,,False
+B_1,1,SUCCEEDED,19.77,-0.43,3.33,90.0,-0.503,3.314,91.7,0.074,1.7,tf,docked,0.1,3.01,,False
+B_2,1,SUCCEEDED,11.87,-1.1,3.41,90.0,-0.976,3.417,93.7,0.125,3.7,tf,docked,0.1,3.01,,False
+B_3,1,SUCCEEDED,26.91,-0.65,4.7,270.0,-0.56,4.634,-93.7,0.112,-3.7,tf,docked,0.1,3.01,,False
+B_4,1,SUCCEEDED,11.11,-0.24,4.72,270.0,-0.375,4.69,-90.7,0.139,-0.7,tf,docked,0.1,3.01,,False
+C_1,1,SUCCEEDED,6.71,-0.24,4.72,90.0,-0.364,4.686,92.6,0.128,2.6,tf,docked,0.1,3.01,,False
+C_2,1,SUCCEEDED,9.42,-0.85,4.7,90.0,-0.738,4.681,90.8,0.114,0.8,tf,docked,0.1,3.01,,False
+C_3,1,SUCCEEDED,29.77,-0.87,6.07,270.0,-0.956,6.038,-90.1,0.092,-0.1,tf,docked,0.1,3.01,,False
+C_4,1,SUCCEEDED,12.41,-0.05,6.0,270.0,-0.136,5.992,-91.8,0.086,-1.8,tf,docked,0.1,3.01,,False

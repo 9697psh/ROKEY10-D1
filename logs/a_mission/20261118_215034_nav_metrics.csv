@@ -1,0 +1,7 @@
+goal,attempt,result,elapsed_s,goal_x,goal_y,goal_yaw_deg,actual_x,actual_y,actual_yaw_deg,pos_err_m,yaw_err_deg,pose_src,start,localize_s
+sector_1,1,SUCCEEDED,2.35,-0.71,0.0,180.0,-0.507,0.013,-177.0,0.203,3.0,tf,undocked,0.0
+sector_2,1,SUCCEEDED,20.21,-1.88,0.04,0.0,-1.947,0.264,5.5,0.234,5.5,tf,undocked,0.0
+sector_2,1,SUCCEEDED,16.1,-0.82,3.3,90.0,-0.957,3.182,91.0,0.181,1.0,tf,undocked,0.0
+sector_2,1,SUCCEEDED,8.39,-1.88,3.25,90.0,-1.681,3.251,91.8,0.199,1.8,tf,undocked,0.0
+sector_2,1,SUCCEEDED,13.01,-0.97,4.74,270.0,-1.179,4.771,-94.5,0.211,-4.5,tf,undocked,0.0
+sector_2,1,SUCCEEDED,6.55,-2.0,4.6,270.0,-1.673,4.734,-91.2,0.354,-1.2,tf,undocked,0.0

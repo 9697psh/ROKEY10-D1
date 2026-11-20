@@ -1,0 +1,6 @@
+# 빌드 결과 (다른 PC 에서 colcon build 로 다시 생성)
+build/
+install/
+log/
+__pycache__/
+*.pyc

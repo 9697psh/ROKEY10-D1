@@ -1,0 +1,10 @@
+85c8d419ed2a9de0fcb7831ec56c6063  a_mission.py
+3125be046b8a5716edbc0355e7ac6078  a_remission.py
+f20abfb1e68367a0bf3d8d0103e511b9  dummy_battery.py
+b881f746d05add5c5ac317305d93fc83  dummy_receiver.py
+439b739ff2ef64cc40a3ef8ae10c89df  dummy_remission_server.py
+09dab66122c8f6ade30f92809e3aaa38  dummy_server.py
+8ea78e91f16e5f60fe3af61e19ce7227  v1_initial_pose.py
+c2ff8235ae5fbd2c1e5db058ad0f7548  v2_capture_send.py
+5b7e163c26a7f59b4939678d4286fa76  v3_mission_cmd.py
+8aca5573b1c28306d77d1f14a1f17ff6  v4_battery.py

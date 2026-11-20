@@ -1,0 +1,2 @@
+mission_id,status,success,message,visited,total,accept_s,feedback_count,total_s
+M_TEST_001,SUCCEEDED,False,도착 8/11,8,11,0.27,220,220.5

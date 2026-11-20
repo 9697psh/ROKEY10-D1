@@ -1,0 +1,16 @@
+# 서버 → 로봇 A 시작 명령 (액션 이름: mission_cmd)
+# goal: 서버가 보내는 값
+string mission_id        # 임무 ID (예: M_20261119_001)
+string[] zones           # 순찰할 구역 (예: [A01, A02, A03, A04])
+---
+# result: 임무가 끝났을 때 로봇 A가 돌려주는 값
+bool success             # 모든 지점에 도착했으면 true
+string message           # 요약 (예: 도착 4/4)
+uint32 visited           # 도착한 지점 수
+uint32 total             # 전체 지점 수
+---
+# feedback: 임무 중 1초마다 보내는 진행 상황
+string state             # idle | undocking | moving | capturing | docking | charging | error
+string current_zone      # 지금 이동 중인 지점 이름
+uint32 visited
+uint32 total

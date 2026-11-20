@@ -1,0 +1,9 @@
+id,time,sector,x,y,yaw,mode,width,height,jpeg_bytes,paired,file
+1,2026-11-19 15:14:35,A_1,-0.474,0.06,-177.9,patrol,352,352,30485,True,/home/hv-05/farmmate_ws/logs/a_mission/received/1_A_1.jpg
+2,2026-11-19 15:14:58,A_2,-1.964,0.367,8.7,patrol,352,352,28299,True,/home/hv-05/farmmate_ws/logs/a_mission/received/2_A_2.jpg
+3,2026-11-19 15:15:18,B_1,-0.52,3.328,90.5,patrol,352,352,29920,True,/home/hv-05/farmmate_ws/logs/a_mission/received/3_B_1.jpg
+4,2026-11-19 15:15:30,B_2,-1.0,3.408,89.0,patrol,352,352,26797,True,/home/hv-05/farmmate_ws/logs/a_mission/received/4_B_2.jpg
+5,2026-11-19 15:15:52,B_3,-1.037,4.825,-87.6,patrol,352,352,26047,True,/home/hv-05/farmmate_ws/logs/a_mission/received/5_B_3.jpg
+6,2026-11-19 15:16:04,B_4,-0.329,4.729,-84.1,patrol,352,352,19930,True,/home/hv-05/farmmate_ws/logs/a_mission/received/6_B_4.jpg
+7,2026-11-19 15:16:13,C_1,-0.321,4.768,86.7,patrol,352,352,28542,True,/home/hv-05/farmmate_ws/logs/a_mission/received/7_C_1.jpg
+8,2026-11-19 15:16:25,C_2,-0.833,4.739,84.7,patrol,352,352,27312,True,/home/hv-05/farmmate_ws/logs/a_mission/received/8_C_2.jpg

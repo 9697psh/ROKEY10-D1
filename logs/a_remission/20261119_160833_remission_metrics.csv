@@ -1,0 +1,7 @@
+list_id,goal,attempt,result,elapsed_s,goal_x,goal_y,goal_yaw_deg,actual_x,actual_y,actual_yaw_deg,pos_err_m,yaw_err_deg,pose_src,capture_s,image_file,published
+R_TEST_001,A_1,1,FAILED,3.0,-0.55,0.0,180.0,-0.388,0.012,-178.9,0.162,1.1,tf,,,False
+R_TEST_001,A_1,2,FAILED,0.04,-0.55,0.0,180.0,-0.388,0.012,-178.9,0.162,1.1,tf,,,False
+R_TEST_001,A_1,3,FAILED,0.02,-0.55,0.0,180.0,-0.388,0.012,-178.9,0.162,1.1,tf,,,False
+R_TEST_001,A_2,1,FAILED,10.75,-1.93,0.0,0.0,-0.513,-0.008,-80.0,1.417,-80.0,tf,,,False
+R_TEST_001,A_2,2,FAILED,6.92,-1.93,0.0,0.0,-0.46,0.031,71.3,1.47,71.3,tf,,,False
+R_TEST_001,A_2,3,FAILED,0.05,-1.93,0.0,0.0,-0.46,0.031,71.3,1.47,71.3,tf,,,False

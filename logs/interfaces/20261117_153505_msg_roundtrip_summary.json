@@ -1,0 +1,58 @@
+{
+  "run_start": "2026-11-17 15:35:05",
+  "count": 100,
+  "rate_hz": 10.0,
+  "tasks_per_array": 4,
+  "photo": "synthetic 1280x720 q90",
+  "photo_bytes": 324175,
+  "ros_domain_id": "77",
+  "rmw": "default",
+  "build_seconds": 7.86,
+  "note": "같은 PC 안 시험 (PC 간 네트워크 지연은 통합 시험에서 별도 측정)",
+  "by_type": {
+    "WorkTargetArray": {
+      "topic": "/farm/work_targets",
+      "sent": 100,
+      "received": 100,
+      "recv_rate": 1.0,
+      "latency_ms_mean": 3.345,
+      "latency_ms_p95": 4.275,
+      "latency_ms_max": 4.921,
+      "size_bytes": 2595519,
+      "fields_mismatch": 0
+    },
+    "TaskAck": {
+      "topic": "/farm/task_ack",
+      "sent": 100,
+      "received": 100,
+      "recv_rate": 1.0,
+      "latency_ms_mean": 0.274,
+      "latency_ms_p95": 0.363,
+      "latency_ms_max": 0.554,
+      "size_bytes": 57,
+      "fields_mismatch": 0
+    },
+    "TaskResult": {
+      "topic": "/farm/sector_complete",
+      "sent": 100,
+      "received": 100,
+      "recv_rate": 1.0,
+      "latency_ms_mean": 0.283,
+      "latency_ms_p95": 0.306,
+      "latency_ms_max": 0.428,
+      "size_bytes": 168,
+      "fields_mismatch": 0
+    },
+    "SurveyComplete": {
+      "topic": "/farm/survey_complete",
+      "sent": 100,
+      "received": 100,
+      "recv_rate": 1.0,
+      "latency_ms_mean": 0.255,
+      "latency_ms_p95": 0.287,
+      "latency_ms_max": 0.447,
+      "size_bytes": 44,
+      "fields_mismatch": 0
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# 로봇 A → 서버: 재순찰 목록 요청 (서비스 이름: remission_list)
+string robot_id          # 요청한 로봇 (예: robot_a)
+---
+string list_id           # 목록 ID (목록이 바뀌면 달라짐)
+ZonePose[] zones         # 아직 재확인하지 않은 구역. 비어 있으면 할 일이 없음

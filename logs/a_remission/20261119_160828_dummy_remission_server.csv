@@ -1,0 +1,8 @@
+time,event,list_id,zones
+16:08:35,request,R_TEST_001,A_1 A_2
+16:09:33,request,R_TEST_001,A_1 A_2
+16:09:38,request,R_TEST_001,A_1 A_2
+16:09:43,request,R_TEST_001,A_1 A_2
+16:09:48,request,R_TEST_001,A_1 A_2
+16:09:53,request,R_TEST_001,A_1 A_2
+16:09:58,request,R_TEST_001,A_1 A_2

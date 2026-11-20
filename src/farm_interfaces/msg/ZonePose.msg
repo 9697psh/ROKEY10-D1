@@ -1,0 +1,5 @@
+# 재순찰할 구역 하나 (RemissionList.srv 에서 사용)
+string zone        # 구역 이름 (예: A01)
+float64 x          # 지도 좌표 x (m)
+float64 y          # 지도 좌표 y (m)
+float64 yaw        # 방향 (rad)

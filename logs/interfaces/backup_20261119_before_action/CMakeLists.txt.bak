@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.8)
+project(farm_interfaces)
+
+# ROS 2 공식 튜토리얼 "Creating custom msg and srv files" 구조
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/TargetObject.msg"
+  "msg/WorkTarget.msg"
+  "msg/WorkTargetArray.msg"
+  "msg/TaskAck.msg"
+  "msg/TaskResult.msg"
+  "msg/SurveyComplete.msg"
+  DEPENDENCIES std_msgs geometry_msgs sensor_msgs builtin_interfaces
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+ament_package()
